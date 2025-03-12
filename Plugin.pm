@@ -1015,6 +1015,7 @@ sub _renderTrack {
 		favorites_title => $item->{title} . ' - ' . $item->{artist}->{name},
 		line1 => $item->{title},
 		line2 => $item->{artist}->{name},
+		duration => $item->{duration},	# not supported by SlimBrowse without additional support
 		on_select => 'play',
 		url => $url,
 		play => $url,
