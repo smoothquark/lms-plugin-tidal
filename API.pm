@@ -219,6 +219,7 @@ sub cacheTrackMetadata {
 			disc => $entry->{volumeNumber},
 			tracknum => $entry->{trackNumber},
 			url => $entry->{url},
+			bpm => $entry->{bpm},				# add bpm
 			mediaMetadata => $entry->{mediaMetadata},	# add mediaMetadata
 		};
 

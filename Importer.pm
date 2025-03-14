@@ -372,6 +372,7 @@ sub _prepareTrack {
 		REPLAYGAIN_TRACK_GAIN => $track->{trackReplayGain} || $track->{replayGain},
 		REPLAYGAIN_TRACK_PEAK => $track->{trackPeakAmplitude} || $track->{peak},
 		# extra data
+		BPM          => $track->{bpm},
 		CHANNELS     => $trackInfo->{channels},
 		SAMPLERATE   => $track->{sampleRate} || $trackInfo->{sample_rate},
 		SAMPLESIZE   => $track->{bitDepth} || $trackInfo->{sample_size},
