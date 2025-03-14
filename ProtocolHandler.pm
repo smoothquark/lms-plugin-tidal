@@ -290,7 +290,6 @@ sub getNextTrack {
 						$song->track->channels(6);	# always 5.1
 						$song->track->samplesize(24);	# always 24bits
 					}
-					
 
 					# update what we got from parsing actual stream and update metadata
 					$song->pluginData('bitrate', sprintf("%.0f" . Slim::Utils::Strings::string('KBPS'), $song->track->bitrate/1000));
