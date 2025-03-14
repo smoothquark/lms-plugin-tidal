@@ -212,7 +212,7 @@ sub getNextTrack {
 
 			# check if DASH is supported before allowing playback
 			if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt| && $prefs->get('enableDASH') ne '1') {
-				return _gotTrackError("only plays streams $response->{manifestMimeType}", $errorCb);
+				return _gotTrackError("currently unable to play stream $response->{manifestMimeType}", $errorCb);
 			}
 
 			# manifest depends on manifestMimeType
