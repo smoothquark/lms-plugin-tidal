@@ -336,3 +336,39 @@ PLUGIN_TIDAL_SHOW_ALL
 	EN	Show both
 	FR	Montrer les deux versions des albums.
 	HU	Mutassa mindkettőt
+
+PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS
+	EN	Tidal DASH /Dolby Atmos Experimental Support	
+
+PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS_DESC
+	EN	Experimental support for Tidal Max and Tidal Dolby Atmos	
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID
+	EN	Client ID
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID_DESC
+	EN	Provide a custom TIDAL Client ID	
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET
+	EN	Client Secret
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET_DESC
+	EN	Provide a custom TIDAL Client Secret	
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH
+	EN	TIDAL DASH
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_DESC
+	EN	Enables support for TIDAL DASH which is required for HiRes (Max) support. Files will be downloaded as .mpd and played as FLAC
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS
+	EN	TIDAL Dolby Atmos
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS_DESC
+	EN	Enable TIDAL Dolby Atmos. Files will be streamed as .mp4
+
+MPD
+	EN	Tidal MPEG_DASH
+
+MP4EAC3
+	EN	Tidal Dolby Atmos

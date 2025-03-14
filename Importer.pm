@@ -320,7 +320,8 @@ my %roleMap = (
 sub _prepareTrack {
 	my ($album, $track) = @_;
 
-	$ct ||= Plugins::TIDAL::API::getFormat();
+	my $trackInfo = Plugins::TIDAL::API::getMediaInfo($track);
+	$ct = $trackInfo->{format};
 	my $url = 'tidal://' . $track->{id} . ".$ct";
 
 	my $trackData = {
@@ -341,12 +342,17 @@ sub _prepareTrack {
 		EXTID        => $url,
 		TIMESTAMP    => $album->{added},
 		CONTENT_TYPE => $ct,
-		LOSSLESS     => $ct eq 'flc' ? 1 : 0,
+		# flc and mpd (DASH) are lossless
+		LOSSLESS     => $ct eq 'flc' || $ct eq 'mpd' ? 1 : 0,
 		RELEASETYPE  => $album->{type},
 		REPLAYGAIN_ALBUM_GAIN => $track->{albumReplayGain},
 		REPLAYGAIN_ALBUM_PEAK => $track->{albumPeakAmplitude},
 		REPLAYGAIN_TRACK_GAIN => $track->{trackReplayGain} || $track->{replayGain},
 		REPLAYGAIN_TRACK_PEAK => $track->{trackPeakAmplitude} || $track->{peak},
+		# extra data
+		CHANNELS     => $trackInfo->{channels},
+		SAMPLERATE   => $track->{sampleRate} || $trackInfo->{sample_rate},
+		SAMPLESIZE   => $track->{bitDepth} || $trackInfo->{sample_size},
 	};
 
 	my %contributors;

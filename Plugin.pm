@@ -1002,8 +1002,11 @@ sub _renderTrack {
 
 	my $title = $item->{title};
 	$title .= ' - ' . $item->{artist}->{name} if $addArtistToTitle;
-	my $url = "tidal://$item->{id}." . Plugins::TIDAL::API::getFormat();
 
+	# track format can be mpd or mp4 for HIRES_LOSSLESS and DOLBY ATMOS
+	# or flc for LOSSLESS
+	my $url = "tidal://$item->{id}." . Plugins::TIDAL::API::getMediaInfo($item)->{format};
+	
 	my $fixedParams = {
 		playlistId => $playlistId,
 		index => $index,
