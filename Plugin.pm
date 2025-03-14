@@ -955,7 +955,11 @@ sub _renderAlbum {
 	my $release_year = $item->{year} || substr($item->{releaseDate},0,4) || 0;
 	$item->{title} .= (' (' . $release_year . ')') if $release_year;
 	
-	$item->{title} .= ' [E]' if $item->{explicit};
+	# add quality / explicit tag(s) to title
+	my $media_tag = Plugins::TIDAL::API::getMediaInfo($item)->{media_tag};
+	$media_tag .= '[E]' if $item->{explicit};
+	$item->{title} .= (' ' . $media_tag) if $media_tag;
+
 	my $title = $item->{title};
 	$title .= ' - ' . $artist->{name} if $addArtistToTitle;
 
