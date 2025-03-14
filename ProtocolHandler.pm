@@ -225,6 +225,8 @@ sub getNextTrack {
 			}
 			return _gotTrackError($@, $errorCb) if $@;
 
+			main::DEBUGLOG && $log->is_debug && $log->debug("Manifest for track " . $trackId . ": " . $manifest);
+
 			# format and stream are dependent on manifest mimetype 
 			my $format;
 			my $streamUrl;
