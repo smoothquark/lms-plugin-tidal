@@ -214,7 +214,7 @@ sub cacheTrackMetadata {
 			duration => $entry->{duration},
 			icon => $icon,
 			cover => $icon,
-			replay_gain => $entry->{replayGain} || 0,
+			replayGain => $entry->{replayGain} || 0, # for consistency with Importer.pm
 			peak => $entry->{peak},
 			disc => $entry->{volumeNumber},
 			tracknum => $entry->{trackNumber},
