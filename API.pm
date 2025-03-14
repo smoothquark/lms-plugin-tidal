@@ -220,6 +220,7 @@ sub cacheTrackMetadata {
 			tracknum => $entry->{trackNumber},
 			url => $entry->{url},
 			bpm => $entry->{bpm},				# add bpm
+			explicit => $entry->{explicit},			# add explicit
 			mediaMetadata => $entry->{mediaMetadata},	# add mediaMetadata
 		};
 

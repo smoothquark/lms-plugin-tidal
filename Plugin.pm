@@ -1007,6 +1007,7 @@ sub _renderTrack {
 
 	my $title = $item->{title};
 	$title .= ' - ' . $item->{artist}->{name} if $addArtistToTitle;
+	$item->{title} .= ' [E]' if $item->{explicit};
 
 	# track format can be mpd or mp4 for HIRES_LOSSLESS and DOLBY ATMOS
 	# or flc for LOSSLESS
