@@ -246,9 +246,9 @@ sub getNextTrack {
 				# save the manifest to a temporary file and stream from there
 				# temporary file is only deleted automatically when the program ends
 				# this is not ideal as it will clutter up the temp directory
-				my $fh = File::Temp->new(DIR => Slim::Utils::Misc::getTempDir, SUFFIX => '.mpd', UNLINK => 0);
+				my $fh = File::Temp->new(DIR => Slim::Utils::Misc::getTempDir, SUFFIX => '.' . $format, UNLINK => 0);
 				$fh->write($manifest);
-				$fh->seek(0, 0);
+				$fh->close();
 				$streamUrl = Slim::Utils::Misc::fileURLFromPath($fh);
 
 				# some details need to be added
