@@ -66,6 +66,14 @@
 			prefs.pref_enableDASH %]checked="checked" [% END %] value="1" class="stdedit" />
 	[% END %]
 
+	[% WRAPPER settingGroup title="" desc="" %]
+		<input type="checkbox" name="pref_enableDASHStream" id="enableDASHStream" [% IF
+			prefs.pref_enableDASHStream %]checked="checked" [% END %] value="1" class="stdedit" />
+			<label for="enableDASHStream">[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM" | string %]</label>
+		<br/>
+		[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM_DESC" | string %]
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS" desc="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS_DESC" %]
 		<input type="checkbox" name="pref_enableAtmos" id="enableAtmos" [% IF
 			prefs.pref_enableAtmos %]checked="checked" [% END %] value="1" class="stdedit" />

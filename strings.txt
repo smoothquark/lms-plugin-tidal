@@ -361,6 +361,12 @@ PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH
 PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_DESC
 	EN	Enables support for TIDAL DASH which is required for HiRes (Max) support. Files will be downloaded as .mpd and played as FLAC
 
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM
+	EN	DASH stream support
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM_DESC
+	EN	Retrieves and parses TIDAL DASH streams for more detailed metadata (sample rate, album replay gain etc)
+
 PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS
 	EN	TIDAL Dolby Atmos
 
