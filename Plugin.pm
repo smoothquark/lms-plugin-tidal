@@ -950,6 +950,11 @@ sub _renderAlbum {
 
 	# we could also join names
 	my $artist = $item->{artist} || $item->{artists}->[0] || {};
+
+	# add year to title
+	my $release_year = $item->{year} || substr($item->{releaseDate},0,4) || 0;
+	$item->{title} .= (' (' . $release_year . ')') if $release_year;
+	
 	$item->{title} .= ' [E]' if $item->{explicit};
 	my $title = $item->{title};
 	$title .= ' - ' . $artist->{name} if $addArtistToTitle;
