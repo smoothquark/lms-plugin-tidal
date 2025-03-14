@@ -275,7 +275,7 @@ sub getNextTrack {
 
 			# update format (but Dolby Atmos will need further correction later)
 			$song->pluginData(format => $format);
- 			
+
 			# main::INFOLOG && $log->info("got $format track at $streamUrl");
 			$song->streamUrl($streamUrl);
 
