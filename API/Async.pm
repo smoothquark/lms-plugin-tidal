@@ -177,7 +177,8 @@ sub _filterAlbums {
 			&& !$seen{$fingerprint}++
 	} map {
 		my $item = $_;
-		my $fingerprint = join(':', $item->{artist}->{id}, $item->{title}, $item->{numberOfTracks}, Plugins::TIDAL::API::getMediaInfo($item)->{media_tag},($wantsBoth ? $item->{explicit} : undef));
+		my $item_tag = Plugins::TIDAL::API::getMediaInfo($item)->{media_tag};
+		my $fingerprint = join(':', $item->{artist}->{id}, $item->{title}, $item->{numberOfTracks}, $item_tag,($wantsBoth ? $item->{explicit} : undef));
 
 		$explicit{$fingerprint} ||= $_->{explicit};
 		$nonExplicit{$fingerprint} ||= !$_->{explicit};
