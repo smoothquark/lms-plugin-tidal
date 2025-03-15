@@ -247,6 +247,7 @@ sub getNextTrack {
 				# temporary file is only deleted automatically when the program ends
 				# this is not ideal as it will clutter up the temp directory
 				my $fh = File::Temp->new(DIR => Slim::Utils::Misc::getTempDir, SUFFIX => '.' . $format, UNLINK => 0);
+    				main::DEBUGLOG && $log->is_debug && $log->debug("Writing manifest for track " . $trackId . " to: " . $fh);
 				$fh->write($manifest);
 				$fh->close();
 				$streamUrl = Slim::Utils::Misc::fileURLFromPath($fh);
