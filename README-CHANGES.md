@@ -22,7 +22,7 @@ I have been experimenting with HiRes / Dolby Atmos support. Initial testing thus
 6. Transcoding (ffmpeg) is required to playback Dolby Atmos by encapsulating as a 2 channel FLAC or WAV as LMS does not directly support multichannel files. I found that both FLAC and WAV work with squeezelite (squeezelite -W -c pcm,flac -o hdmi:CARD=NVidia,DEV=0) on my test system connected to a Denon AVR, but when using MPD + upmpdcli and the uPnP-Bridge, only FLAC gets passed correctly to MPD and then via HDMI to my Denon AVR.
 7. I have added a custom-convert.conf with some examples that work for me. You may need to add cut and paste to your own custom-convert.conf with specific MAC addresses to get the correct set up for your system.
 8. When searching for artist/albums, some Hires Lossless albums are not picked up. I think this may be because when there are identical album names and track numbers, either the Max or High versions are picked up and not both. I shall try to expolre this.
-9. I am planning to add support to show [H], [M] or [A] for High, Max and Atmos albums respectively.
+9. Album names now show [H], [M] or [A] for High, Max and Atmos albums respectively.
 10. For explicit tracks, [E] is now shown, just as it does for albums.
  
 ## Other changes:
