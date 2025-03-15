@@ -171,12 +171,14 @@ sub _filterAlbums {
 	return [ grep {
 		my $fingerprint = $_->{fingerprint};
 
-		scalar (grep /^LOSSLESS$/, @{$_->{mediaMetadata}->{tags} || []})
+		# LOSSLESS will pick-up HIRES too. Add Atmos albums if enabled
+		scalar (grep /^LOSSLESS$/ || ($prefs->get('enableAtmos') eq '1' ? /^DOLBY_ATMOS$/ : /^$/), @{$_->{mediaMetadata}->{tags} || []})
 			&& $explicitFilter->($_->{explicit}, $fingerprint)
 			&& !$seen{$fingerprint}++
 	} map {
 		my $item = $_;
-		my $fingerprint = join(':', $item->{artist}->{id}, $item->{title}, $item->{numberOfTracks}, ($wantsBoth ? $item->{explicit} : undef));
+		my $item_tag = Plugins::TIDAL::API::getMediaInfo($item)->{media_tag};
+		my $fingerprint = join(':', $item->{artist}->{id}, $item->{title}, $item->{numberOfTracks}, $item_tag, ($wantsBoth ? $item->{explicit} : undef));
 
 		$explicit{$fingerprint} ||= $_->{explicit};
 		$nonExplicit{$fingerprint} ||= !$_->{explicit};
