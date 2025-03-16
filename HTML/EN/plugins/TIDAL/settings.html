@@ -67,6 +67,13 @@
 	[% END %]
 
 	[% WRAPPER settingGroup title="" desc="" %]
+		<input type="checkbox" name="pref_enableDASHPreferHiRes" id="enableDASHPreferHiRes" [% IF
+			prefs.pref_enableDASHPreferHiRes %]checked="checked" [% END %] value="1" class="stdedit" />
+			<label for="enableDASHenableDASHPreferHiRes">[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_PREFER_HIRES" | string %]</label>
+		<br/>
+		[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_PREFER_HIRES_DESC" | string %]
+		<br/>
+		<br>
 		<input type="checkbox" name="pref_enableDASHStream" id="enableDASHStream" [% IF
 			prefs.pref_enableDASHStream %]checked="checked" [% END %] value="1" class="stdedit" />
 			<label for="enableDASHStream">[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM" | string %]</label>

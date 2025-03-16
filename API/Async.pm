@@ -195,6 +195,18 @@ sub _filterAlbums {
 			$include{$fingerprint} = '1';	# include LOSSLESS [High] by default
 		}
 
+		# check if HIRES LOSSLESS just preferred to just LOSSLESS
+		if ($prefs->get('enableDASHPreferHiRes') eq '1') {
+			if ($item_tag eq '[M]') { # remove [H] album if it is already present
+				my $fingerprint_check = $fingerprint =~ s/:\[M\]:/:\[H\]:/r;
+				if ($include{$fingerprint_check} eq '1') { $include{$fingerprint_check} = '0'; }		
+			}
+			elsif ($item_tag eq '[H]') { # do not add [H] if [M] is already present
+				my $fingerprint_check = $fingerprint =~ s/:\[H\]:/:\[M\]:/r;
+				if ($include{$fingerprint_check} eq '1') { $include{$fingerprint} = '0'; }		
+			}
+		}
+
 		$item->{fingerprint} = $fingerprint;
 		$item;
 	} @{$albums || []} ];
