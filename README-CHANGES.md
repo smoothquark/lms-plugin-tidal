@@ -21,9 +21,10 @@ I have been experimenting with HiRes / Dolby Atmos support. Initial testing thus
 5. Transcoding of mpd to flac (ffmpeg) is required to playback mpd files as there is currently no native support for mpd in LMS. The manifest states mp4 with a flac codec.
 6. Transcoding (ffmpeg) is required to playback Dolby Atmos by encapsulating as a 2 channel FLAC or WAV as LMS does not directly support multichannel files. I found that both FLAC and WAV work with squeezelite (squeezelite -W -c pcm,flac -o hdmi:CARD=NVidia,DEV=0) on my test system connected to a Denon AVR, but when using MPD + upmpdcli and the uPnP-Bridge, only FLAC gets passed correctly to MPD and then via HDMI to my Denon AVR.
 7. I have added a custom-convert.conf with some examples that work for me. You may need to add cut and paste to your own custom-convert.conf with specific MAC addresses to get the correct set up for your system.
-8. When searching for artist/albums, some Hires Lossless albums are not picked up. I think this may be because when there are identical album names and track numbers, either the Max or High versions are picked up and not both. I shall try to expolre this.
-9. Album names now show [H], [M] or [A] for High, Max and Atmos albums respectively.
-10. For explicit tracks, [E] is now shown, just as it does for albums.
+8. When searching for artist/albums, some Hires Lossless albums were not picked up when artist name, album name and number of tracks were the same. This has now been corrected.
+9. There is also now an option to prefer HIRES LOSSLESS [Max] over LOSSLESS [High] when artist name, album name and number of tracks match.
+10. Album names now show [H], [M] or [A] for High, Max and Atmos albums respectively.
+11. For explicit tracks, [E] is now shown, just as it does for albums.
  
 ## Other changes:
 1. Track durations are passed to Slim::Control:XMLBrowser and with some relatively trivial changes to the LMS code and Material code, track durations and album total duration show up in Material.
