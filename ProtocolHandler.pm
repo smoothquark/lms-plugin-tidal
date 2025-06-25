@@ -36,6 +36,9 @@ Slim::Player::ProtocolHandlers->registerURLHandler($URI_REGEX, __PACKAGE__);
 sub canSkip { 1 }	# where is this called?
 sub canSeek { 1 }
 
+# needs to be set to 1 to allow seek for MPD DASH and TIDAL Atmos
+sub canTranscodeSeek { $prefs->get('enableDASH') eq '1' || $prefs->get('enableAtmos') eq '1' ? 1 : 0 }
+
 sub getFormatForURL {
 	my ($class, $url) = @_;
 	return if $url =~ m{^(?:tidal|wimp)://.+:.+};
@@ -45,7 +48,7 @@ sub getFormatForURL {
 sub formatOverride {
 	my ($class, $song) = @_;
 	my $format = $song->pluginData('format') || Plugins::TIDAL::API::getFormat;
-	return $format =~ s/mp4/aac/r;
+	return $format =~ s/^mp4$/aac/r; # to support TIDAL ATMOS we do not want the mp4 (mp4eac3) to be converted to aac
 }
 
 # some TIDAL streams are compressed in a way which causes stutter on ip3k based players
@@ -182,7 +185,9 @@ sub getNextTrack {
 			sub {
 				my ($result, $acb) = @_;
 
-				if ($result && $result->{manifestMimeType} !~ m|application/vnd.tidal.bt| && $prefs->get('quality') eq 'HI_RES') {
+				# get regular CD quality if HiRes track is requested but MPD DASH is not enabled
+				# Atmos track will automatically be requested as 2CH if Atmos is not supported by client ID/secret
+				if ($result && $result->{manifestMimeType} !~ m|application/vnd.tidal.bt| && $prefs->get('quality') eq 'HI_RES' && $prefs->get('enableDASH') ne '1') {
 					$log->warn("failed to get streamable HiRes track ($url - $result->{manifestMimeType}), trying regular CD quality instead");
 					Plugins::TIDAL::Plugin::getAPIHandler($client)->getTrackUrl(sub {
 						$acb->($_[0])
@@ -205,25 +210,71 @@ sub getNextTrack {
 
 			return _gotTrackError($error, $errorCb) if $error;
 
-			# no DASH or other for now
-			if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt|) {
-				return _gotTrackError("only plays streams $response->{manifestMimeType}", $errorCb);
+			# check if DASH is supported before allowing playback
+			if ($response->{manifestMimeType} !~ m|application/vnd.tidal.bt| && $prefs->get('enableDASH') ne '1') {
+				return _gotTrackError("currently unable to play stream $response->{manifestMimeType}", $errorCb);
 			}
 
-			my $manifest = eval { from_json(decode_base64($response->{manifest})) };
+			# manifest depends on manifestMimeType
+			my $manifest = "";
+			if ($response->{manifestMimeType} =~ m|application/vnd.tidal.bt|) {
+				$manifest = eval { from_json(decode_base64($response->{manifest})) };
+			}
+			else {	
+				$manifest = eval { decode_base64($response->{manifest}) };
+			}
 			return _gotTrackError($@, $errorCb) if $@;
 
-			my $streamUrl = $manifest->{urls}[0];
-			my ($format) = $manifest->{mimeType} =~ m|audio/(\w+)|;
-			$format =~ s/flac/flc/;
+			main::DEBUGLOG && $log->is_debug && $log->debug("Manifest for track " . $trackId . ": " . $manifest);
+
+			# format and stream are dependent on manifest mimetype 
+			my $format;
+			my $streamUrl;
+			if ($response->{manifestMimeType} =~ m|application/vnd.tidal.bt|) {
+				if ($response->{audioMode} eq 'DOLBY_ATMOS') {
+					$format = "mp4";	# set this to mp4 first and then correct it later
+				}
+				else {
+					($format) = $manifest->{mimeType} =~ m|audio/(\w+)|;
+					$format =~ s/flac/flc/;
+				}
+				$streamUrl = $manifest->{urls}[0];
+			}
+			elsif ($response->{manifestMimeType} eq 'application/dash+xml') {
+				$format = "mpd";
+
+				# save the manifest to a temporary file and stream from there
+				# temporary file is only deleted automatically when the program ends
+				# this is not ideal as it will clutter up the temp directory
+				my $fh = File::Temp->new(DIR => Slim::Utils::Misc::getTempDir, SUFFIX => '.' . $format, UNLINK => 0);
+				$fh->write($manifest);
+				$fh->close();
+				$streamUrl = Slim::Utils::Misc::fileURLFromPath($fh);
+
+				# some details need to be added
+				$song->track->channels(2);
+				$song->track->samplerate($response->{sampleRate});
+				$song->track->samplesize($response->{bitDepth});
+				
+				my $metadata = $cache->get( 'tidal_meta_' . $trackId);
+				Slim::Music::Info::setBitrate( $song->track, $response->{sampleRate});
+				Slim::Music::Info::setDuration( $song->track, $metadata->{duration});
+			}
+			else {
+				return _gotTrackError("unknown stream is $response->{manifestMimeType}", $errorCb);
+			}
 
 			# TODO - store album gain information
 
+			# comment out original code as it is probably no longer relevant but worth keeping it for now
 			# this should not happen
-			if ($format ne Plugins::TIDAL::API::getFormat) {
-				$log->warn("did not get the expected format for $trackId ($format <> " . Plugins::TIDAL::API::getFormat() . ')');
-				$song->pluginData(format => $format);
-			}
+			#if ($format ne Plugins::TIDAL::API::getFormat) {
+			#	$log->warn("did not get the expected format for $trackId ($format <> " . Plugins::TIDAL::API::getFormat() . ')');
+			#	$song->pluginData(format => $format);
+			#}
+
+			# update format (but Dolby Atmos will need further correction later)
+			$song->pluginData(format => $format);
 
 			# main::INFOLOG && $log->info("got $format track at $streamUrl");
 			$song->streamUrl($streamUrl);
@@ -232,6 +283,15 @@ sub getNextTrack {
 			Slim::Utils::Scanner::Remote::parseRemoteHeader(
 				$song->track, $streamUrl, $format,
 				sub {
+					# some of the returned values are not correct for Dolby Atmos
+					# also, format for Dolby Atmos has to be changed to mp4eac3
+					if ($response->{audioMode} eq 'DOLBY_ATMOS') {
+						$format = 'mp4eac3';
+						$song->pluginData(format => $format);
+						$song->track->bitrate(768_000);
+						$song->track->channels(6);	# always 5.1
+						$song->track->samplesize(24);	# always 24bits
+					}
 					# update what we got from parsing actual stream and update metadata
 					$song->pluginData('bitrate', sprintf("%.0f" . Slim::Utils::Strings::string('KBPS'), $song->track->bitrate/1000));
 					$client->currentPlaylistUpdateTime( Time::HiRes::time() );

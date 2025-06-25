@@ -48,4 +48,42 @@
 	[% WRAPPER setting title="PLUGIN_TIDAL_COUNTRY_CODE" desc="PLUGIN_TIDAL_COUNTRY_CODE_DESC" %]
 		<input class="stdedit" type="text" name="pref_countryCode" value="[% prefs.pref_countryCode | html %]" />
 	[% END %]
+
+	<hr>
+	<b>[% "PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS" | string %]</b><br>
+	<br>
+
+	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID" desc="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID_DESC" %]
+		<input class="stdedit" type="text" name="pref_cid" value="[% prefs.pref_cid | html %]" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET" desc="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET_DESC" %]
+		<input class="stdedit" type="text" name="pref_sec" value="[% prefs.pref_sec | html %]" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH" desc="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_DESC" %]
+		<input type="checkbox" name="pref_enableDASH" id="enableDASH" [% IF
+			prefs.pref_enableDASH %]checked="checked" [% END %] value="1" class="stdedit" />
+	[% END %]
+
+	[% WRAPPER settingGroup title="" desc="" %]
+		<input type="checkbox" name="pref_enableDASHPreferHiRes" id="enableDASHPreferHiRes" [% IF
+			prefs.pref_enableDASHPreferHiRes %]checked="checked" [% END %] value="1" class="stdedit" />
+			<label for="enableDASHenableDASHPreferHiRes">[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_PREFER_HIRES" | string %]</label>
+		<br/>
+		[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_PREFER_HIRES_DESC" | string %]
+		<br/>
+		<br>
+		<input type="checkbox" name="pref_enableDASHStream" id="enableDASHStream" [% IF
+			prefs.pref_enableDASHStream %]checked="checked" [% END %] value="1" class="stdedit" />
+			<label for="enableDASHStream">[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM" | string %]</label>
+		<br/>
+		[% "PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM_DESC" | string %]
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS" desc="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS_DESC" %]
+		<input type="checkbox" name="pref_enableAtmos" id="enableAtmos" [% IF
+			prefs.pref_enableAtmos %]checked="checked" [% END %] value="1" class="stdedit" />
+	[% END %]
+
 [% PROCESS settings/footer.html %]

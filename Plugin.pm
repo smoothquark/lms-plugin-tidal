@@ -950,7 +950,16 @@ sub _renderAlbum {
 
 	# we could also join names
 	my $artist = $item->{artist} || $item->{artists}->[0] || {};
-	$item->{title} .= ' [E]' if $item->{explicit};
+
+	# add year to title
+	my $release_year = $item->{year} || substr($item->{releaseDate},0,4) || 0;
+	$item->{title} .= (' (' . $release_year . ')') if $release_year;
+	
+	# add quality / explicit tag(s) to title
+	my $media_tag = Plugins::TIDAL::API::getMediaInfo($item)->{media_tag};
+	$media_tag .= '[E]' if $item->{explicit};
+	$item->{title} .= (' ' . $media_tag) if $media_tag;
+
 	my $title = $item->{title};
 	$title .= ' - ' . $artist->{name} if $addArtistToTitle;
 
@@ -1002,7 +1011,11 @@ sub _renderTrack {
 
 	my $title = $item->{title};
 	$title .= ' - ' . $item->{artist}->{name} if $addArtistToTitle;
-	my $url = "tidal://$item->{id}." . Plugins::TIDAL::API::getFormat();
+	$item->{title} .= ' [E]' if $item->{explicit};
+
+	# track format can be mpd or mp4 for HIRES_LOSSLESS and DOLBY ATMOS
+	# or flc for LOSSLESS
+	my $url = "tidal://$item->{id}." . Plugins::TIDAL::API::getMediaInfo($item)->{format};
 
 	my $fixedParams = {
 		playlistId => $playlistId,
@@ -1015,6 +1028,7 @@ sub _renderTrack {
 		favorites_title => $item->{title} . ' - ' . $item->{artist}->{name},
 		line1 => $item->{title},
 		line2 => $item->{artist}->{name},
+		duration => $item->{duration},	# not supported by SlimBrowse without additional support
 		on_select => 'play',
 		url => $url,
 		play => $url,

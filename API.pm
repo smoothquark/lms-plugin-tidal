@@ -40,7 +40,8 @@ use constant SOUND_QUALITY => {
 	LOW => 'mp4',
 	HIGH => 'mp4',
 	LOSSLESS => 'flc',
-	HI_RES => 'flc',
+	HI_RES => 'flc', # HI_RES may all be now MPD DASH but return flc anyway
+	DOLBY_ATMOS => 'mp4eac3',	# differentiate from mp4
 };
 
 my $cache = Slim::Utils::Cache->new;
@@ -116,6 +117,49 @@ sub getImageUrl {
 	return $data->{cover} || (!main::SCANNER && $usePlaceholder && Plugins::TIDAL::Plugin->_pluginDataFor('icon'));
 }
 
+# Get media info (TO DO: should add support for other quality too)
+# sample rate for HIRES_LOSSLESS is currently not available from API
+sub getMediaInfo {
+	my ($item) = @_;
+
+	# set defaults
+	my $ct ||= Plugins::TIDAL::API::getFormat();
+	my $channels = 2;	# default to stereo
+	my $lossless = 1;	# default to CD quality (LOSSLESS)
+	my $mediatag = '[H]';	# default to CD quality (LOSSLESS) [High]
+	my $samplerate = 44100;	# default to CD quality (LOSSLESS)
+	my $samplesize = 16;	# default to CD quality (LOSSLESS)
+
+	my @mediaTags = @{$item->{mediaMetadata}->{tags}};
+	if ( ($prefs->get('enableAtmos') eq '1') && grep( /^DOLBY_ATMOS$/, @mediaTags ) ) {
+		$ct = 'mp4';
+		$channels = 6;
+		$lossless = 0;		# EAC-3 is lossy
+		$mediatag = '[A]';	# [Atmos]
+		$samplerate = 48000;	# always
+		$samplesize = 24;	# always
+	}
+	elsif ( ($prefs->get('enableDASH') eq '1') && grep( /^HIRES_LOSSLESS$/, @mediaTags ) ) {
+		$ct = 'mpd';
+		$mediatag = '[M]';	# [Max]
+		# set samplerate default to 48000 but this is likely to be wrong
+		# without checking the stream
+		$samplerate = 48000;	# likely incorrect
+		$samplesize = 24;	# always
+	}
+	elsif ( ($prefs->get('enableDASH') eq '1') && grep( /^LOSSLESS$/, @mediaTags ) ) {
+		$ct = 'mpd';		# DASH LOSSLESS 16/44.1 
+	}
+
+	return {
+		format => $ct,
+		channels => $channels,
+		media_tag => $mediatag,
+		sample_rate => $samplerate,
+		sample_size => $samplesize,
+	};
+}
+
 sub typeOfItem {
 	my ($class, $item) = @_;
 
@@ -185,6 +229,9 @@ sub cacheTrackMetadata {
 				disc => $entry->{volumeNumber},
 				tracknum => $entry->{trackNumber},
 				url => $entry->{url},
+        bpm => $entry->{bpm},				# add bpm
+			  explicit => $entry->{explicit},			# add explicit
+			  mediaMetadata => $entry->{mediaMetadata},	# add mediaMetadata
 			};
 
 			# cache track metadata aggressively

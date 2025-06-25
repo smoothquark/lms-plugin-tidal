@@ -336,3 +336,51 @@ PLUGIN_TIDAL_SHOW_ALL
 	EN	Show both
 	FR	Montrer les deux versions des albums.
 	HU	Mutassa mindkettőt
+
+PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS
+	EN	Tidal DASH /Dolby Atmos Experimental Support	
+
+PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS_DESC
+	EN	Experimental support for Tidal Max and Tidal Dolby Atmos	
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID
+	EN	Client ID
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID_DESC
+	EN	Provide a custom TIDAL Client ID	
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET
+	EN	Client Secret
+
+PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET_DESC
+	EN	Provide a custom TIDAL Client Secret	
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH
+	EN	TIDAL DASH
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_DESC
+	EN	Enables support for TIDAL DASH which is required for HiRes (Max) support. Files will be downloaded as .mpd and played as FLAC
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_PREFER_HIRES
+	EN	Prefer HIRES LOSSLESS [Max] to LOSSLESS [High]
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_PREFER_HIRES_DESC
+	EN	Disregard LOSSLESS [High] albums if HIRES LOSSLESS [Max] albums with the same artist, title and track numbers are available
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM
+	EN	DASH stream support
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_STREAM_DESC
+	EN	Retrieves and parses TIDAL DASH streams for more detailed metadata (sample rate, album replay gain etc)
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS
+	EN	TIDAL Dolby Atmos
+
+PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_ATMOS_DESC
+	EN	Enable TIDAL Dolby Atmos. Files will be streamed as .mp4
+
+MPD
+	EN	Tidal MPEG_DASH
+
+MP4EAC3
+	EN	Tidal Dolby Atmos
