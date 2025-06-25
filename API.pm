@@ -7,11 +7,12 @@ use Slim::Utils::Cache;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 
-our @EXPORT_OK = qw(AURL BURL KURL SCOPES GRANT_TYPE_DEVICE DEFAULT_LIMIT MAX_LIMIT PLAYLIST_LIMIT DEFAULT_TTL DYNAMIC_TTL USER_CONTENT_TTL);
+our @EXPORT_OK = qw(AURL BURL KURL LURL SCOPES GRANT_TYPE_DEVICE DEFAULT_LIMIT MAX_LIMIT PLAYLIST_LIMIT DEFAULT_TTL DYNAMIC_TTL USER_CONTENT_TTL);
 
 use constant AURL => 'https://auth.tidal.com';
 use constant BURL => 'https://api.tidal.com/v1';
 use constant KURL => 'https://gist.githubusercontent.com/yaronzz/48d01f5a24b4b7b37f19443977c22cd6/raw/5a91ced856f06fe226c1c72996685463393a9d00/tidal-api-key.json';
+use constant LURL => 'https://listen.tidal.com/v2';
 use constant IURL => 'http://resources.tidal.com/images/';
 use constant SCOPES => 'r_usr+w_usr';
 use constant GRANT_TYPE_DEVICE => 'urn:ietf:params:oauth:grant-type:device_code';
@@ -101,6 +102,10 @@ sub getImageUrl {
 		}
 	}
 	elsif (my $images = $data->{mixImages}) {
+		if (ref $images eq 'ARRAY') {
+			$images = { map { substr($_->{size}, 0, 1) => $_ } @$images };
+		}
+
 		my $image = $images->{L} || $images->{M} || $images->{S};
 		$data->{cover} = $image->{url} if $image;
 	}
@@ -171,7 +176,7 @@ sub typeOfItem {
 	elsif ( $item->{type} && defined $item->{numberOfTracks} && ($item->{created} || $item->{creator} || $item->{creators} || $item->{publicPlaylist} || $item->{lastUpdated}) ) {
 		return 'playlist';
 	}
-	elsif ( (defined $item->{mixNumber} && $item->{artists}) || defined $item->{mixType} ) {
+	elsif ( (defined $item->{mixNumber} && $item->{artists}) || defined $item->{mixType} || $item->{type} =~ /_MIX\b/ ) {
 		return 'mix'
 	}
 	# only artists have names? Others have titles?
@@ -195,43 +200,45 @@ sub cacheTrackMetadata {
 
 	return [] unless $tracks;
 
-	return [ map {
+	return [ grep { $_ } map {
 		my $entry = $_;
 		$entry = $entry->{item} if $entry->{item};
 
-		my $oldMeta = $cache->get( 'tidal_meta_' . $entry->{id});
-		$oldMeta = {} unless ref $oldMeta;
+		if ($entry->{allowStreaming} || ! defined $entry->{streamReady}) {
+			my $oldMeta = $cache->get( 'tidal_meta_' . $entry->{id});
+			$oldMeta = {} unless ref $oldMeta;
 
-		my $icon = $class->getImageUrl($entry, 'usePlaceholder', 'track');
-		my $artist = $entry->{artist};
-		($artist) = grep { $_->{type} eq 'MAIN'} @{$entry->{artists}} unless $artist;
+			my $icon = $class->getImageUrl($entry, 'usePlaceholder', 'track');
+			my $artist = $entry->{artist};
+			($artist) = grep { $_->{type} eq 'MAIN' || $_->{main} } @{$entry->{artists}} unless $artist;
 
-		# consolidate metadata in case parsing of stream came first (huh?)
-		my $meta = {
-			%$oldMeta,
-			id => $entry->{id},
-			title => $entry->{title},
-			artist => $artist,
-			artists => $entry->{artists},
-			album => $entry->{album}->{title},
-			album_id => $entry->{album}->{id},
-			duration => $entry->{duration},
-			icon => $icon,
-			cover => $icon,
-			replayGain => $entry->{replayGain} || 0, # for consistency with Importer.pm
-			peak => $entry->{peak},
-			disc => $entry->{volumeNumber},
-			tracknum => $entry->{trackNumber},
-			url => $entry->{url},
-			bpm => $entry->{bpm},				# add bpm
-			explicit => $entry->{explicit},			# add explicit
-			mediaMetadata => $entry->{mediaMetadata},	# add mediaMetadata
-		};
+			# consolidate metadata in case parsing of stream came first (huh?)
+			my $meta = {
+				%$oldMeta,
+				id => $entry->{id},
+				title => $entry->{title},
+				artist => $artist,
+				artists => $entry->{artists},
+				album => $entry->{album}->{title},
+				album_id => $entry->{album}->{id},
+				duration => $entry->{duration},
+				icon => $icon,
+				cover => $icon,
+				replay_gain => $entry->{replayGain} || 0,
+				peak => $entry->{peak},
+				disc => $entry->{volumeNumber},
+				tracknum => $entry->{trackNumber},
+				url => $entry->{url},
+        bpm => $entry->{bpm},				# add bpm
+			  explicit => $entry->{explicit},			# add explicit
+			  mediaMetadata => $entry->{mediaMetadata},	# add mediaMetadata
+			};
 
-		# cache track metadata aggressively
-		$cache->set( 'tidal_meta_' . $entry->{id}, $meta, time() + 90 * 86400);
+			# cache track metadata aggressively
+			$cache->set( 'tidal_meta_' . $entry->{id}, $meta, time() + 90 * 86400);
 
-		$meta;
+			$meta;
+		}
 	} @$tracks ];
 }
 

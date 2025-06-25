@@ -16,7 +16,7 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(string);
 
-use Plugins::TIDAL::API qw(BURL DEFAULT_LIMIT PLAYLIST_LIMIT MAX_LIMIT DEFAULT_TTL DYNAMIC_TTL USER_CONTENT_TTL);
+use Plugins::TIDAL::API qw(BURL LURL DEFAULT_LIMIT PLAYLIST_LIMIT MAX_LIMIT DEFAULT_TTL DYNAMIC_TTL USER_CONTENT_TTL);
 
 use constant CAN_MORE_HTTP_VERBS => Slim::Networking::SimpleAsyncHTTP->can('delete');
 
@@ -220,7 +220,52 @@ sub featured {
 sub home {
 	my ($self, $cb) = @_;
 
-	$self->page($cb, 'pages/home');
+	$self->homeFeed(sub {
+		my $items = shift;
+
+		$self->page(sub {
+			my ($homeItems) = @_;
+
+			# de-duplicate the menu items
+			my %titles = map { $_->{title} => 1 } grep { $_->{title} } @$items;
+			push @$items, grep { !$titles{$_->{title}} } @{$homeItems || []};
+
+			$cb->($items);
+		}, 'pages/home');
+	});
+}
+
+sub homeFeed {
+	my ($self, $cb) = @_;
+
+	_getTZOffset(sub {
+		my ($timeOffset) = @_;
+
+		$timeOffset = undef unless "$timeOffset" =~ m{^[-+]?\d{1,2}:\d{2}$};
+
+		$self->_get(LURL . '/home/feed/static', sub {
+			my $page = shift;
+			my $items = $page->{items} || [];
+
+			foreach my $item (@$items) {
+				$item->{items} = [ map {
+					$_->{data}->{title} ||= $_->{data}->{titleTextInfo}->{text} if $_->{data}->{titleTextInfo};
+					$_->{data};
+				} @{$item->{items} || []} ];
+			}
+
+			$cb->($items || []);
+		}, {
+			_ttl => DYNAMIC_TTL,
+			_personal => 1,
+			deviceType => 'BROWSER',
+			platform => 'WEB',
+			locale => lc($serverPrefs->get('language')),
+			timeOffset => $timeOffset,
+		}, {
+			'x-tidal-client-version' => '2025.4.15',
+		});
+	});
 }
 
 sub page {
@@ -683,9 +728,21 @@ sub getToken {
 	Plugins::TIDAL::API::Auth->refreshToken($cb, $self->userId);
 }
 
+my $_getTZOffset;
+sub _getTZOffset {
+	my ($cb) = @_;
+
+	$_getTZOffset ||= Slim::Utils::DateTime->can('getTZOffsetHHMM')
+		? \&Slim::Utils::DateTime::getTZOffsetHHMM
+		: sub { $_[0]->() };
+
+	$_getTZOffset->($cb);
+}
+
+
 sub _get {
-	my ( $self, $url, $cb, $params ) = @_;
-	$self->_call($url, $cb, $params);
+	my ( $self, $url, $cb, $params, $headers ) = @_;
+	$self->_call($url, $cb, $params, $headers);
 }
 
 sub _post {
@@ -843,11 +900,12 @@ sub _call {
 				}
 			);
 
+			$url = BURL . $url unless $url =~ m{^https?://};
 			if ($method eq 'post') {
-				$http->$method(BURL . $url, %$headers, $query);
+				$http->$method($url, %$headers, $query);
 			}
 			else {
-				$http->$method(BURL . "$url?$query", %$headers);
+				$http->$method("$url?$query", %$headers);
 			}
 		}
 	});
