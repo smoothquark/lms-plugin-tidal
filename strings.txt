@@ -338,7 +338,7 @@ PLUGIN_TIDAL_SHOW_ALL
 	HU	Mutassa mindkettőt
 
 PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS
-	EN	Tidal DASH /Dolby Atmos Experimental Support	
+	EN	Tidal DASH / Dolby Atmos Experimental Support	
 
 PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS_DESC
 	EN	Experimental support for Tidal Max and Tidal Dolby Atmos	
