@@ -53,14 +53,19 @@
 	<b>[% "PLUGIN_TIDAL_EXPERIMENTAL_DASH_ATMOS" | string %]</b><br>
 	<br>
 
+	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_CUSTOM_CLIENT_IDSECRET" desc="PLUGIN_TIDAL_EXPERIMENTAL_CUSTOM_CLIENT_IDSECRET_DESC" %]
+		<input type="checkbox" name="pref_enableCustomClientIDSecret" id="enableCustomClientIDSecret" [% IF
+			prefs.pref_enableCustomClientIDSecret %]checked="checked" [% END %] value="1" class="stdedit" />
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID" desc="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_ID_DESC" %]
-		<input class="stdedit" type="text" name="pref_cid" value="[% prefs.pref_cid | html %]" />
+		<input class="stdedit" type="text" name="pref_custom_cid" value="[% prefs.pref_custom_cid | html %]" />
 	[% END %]
-
+	
 	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET" desc="PLUGIN_TIDAL_EXPERIMENTAL_CLIENT_SECRET_DESC" %]
-		<input class="stdedit" type="text" name="pref_sec" value="[% prefs.pref_sec | html %]" />
+		<input class="stdedit" type="text" name="pref_custom_sec" value="[% prefs.pref_custom_sec | html %]" />
 	[% END %]
-
+	
 	[% WRAPPER setting title="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH" desc="PLUGIN_TIDAL_EXPERIMENTAL_SUPPORT_DASH_DESC" %]
 		<input type="checkbox" name="pref_enableDASH" id="enableDASH" [% IF
 			prefs.pref_enableDASH %]checked="checked" [% END %] value="1" class="stdedit" />

@@ -16,7 +16,7 @@ sub name { Slim::Web::HTTP::CSRF->protectName('PLUGIN_TIDAL_NAME') }
 
 sub page { Slim::Web::HTTP::CSRF->protectURI('plugins/TIDAL/settings.html') }
 
-sub prefs { return ($prefs, qw(quality countryCode cid sec enableDASH enableDASHPreferHiRes enableDASHStream enableAtmos)) }
+sub prefs { return ($prefs, qw(quality countryCode enableCustomClientIDSecret custom_cid custom_sec enableDASH enableDASHPreferHiRes enableDASHStream enableAtmos)) }
 
 sub handler {
 	my ($class, $client, $params, $callback, $httpClient, $response) = @_;
