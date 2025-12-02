@@ -23,12 +23,15 @@ my $log = Slim::Utils::Log->addLogCategory({
 
 my $prefs = preferences('plugin.tidal');
 
-$prefs->migrate(1,
-	sub {
-		$prefs->remove('accounts', 'cid', 'sec');
-		1;
-	}
-);
+$prefs->migrate(1, sub {
+	$prefs->remove('accounts', 'cid', 'sec');
+	1;
+});
+
+$prefs->migrate(2, sub {
+	$prefs->set('quality', 'LOSSLESS') if $prefs->get('quality') eq 'HI_RES';
+	1;
+});
 
 sub initPlugin {
 	my $class = shift;
@@ -95,6 +98,13 @@ sub initPlugin {
 sub postinitPlugin {
 	my $class = shift;
 
+	if ( Slim::Utils::PluginManager->isEnabled('Plugins::MaterialSkin::Plugin') && Plugins::MaterialSkin::Plugin->can('registerHomeExtra') ) {
+		eval {
+			require Plugins::TIDAL::HomeExtras;
+		};
+		$log->error("Could not load TIDAL Home Extras: $@") if $@;
+	}
+
 	if ( Slim::Utils::PluginManager->isEnabled('Slim::Plugin::OnlineLibrary::Plugin') ) {
 		Slim::Plugin::OnlineLibrary::Plugin->addLibraryIconProvider('tidal', '/plugins/TIDAL/html/emblem.png');
 
@@ -146,6 +156,22 @@ sub handleFeed {
 				type => 'textarea',
 			}]
 		});
+	}
+
+	if ($args->{params} && (my $menu = $args->{params}->{menu})) {
+		if ($menu eq 'home_heroes_home') {
+			return getHome( $client, sub {
+				my $items = shift;
+
+				$cb->($items);
+			} );
+		}
+		elsif ($menu eq 'home_heroes_mix') {
+			return getMyMixes( $client, $cb );
+		}
+		elsif ($menu eq 'home_heroes_moods') {
+			return getMoods( $client, $cb );
+		}
 	}
 
 	my $items = [{
