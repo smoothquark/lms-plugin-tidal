@@ -157,7 +157,7 @@ sub _filterAlbums {
 
 	my $explicitAlbumHandling = $prefs->get('explicitAlbumHandling') || {};
 
-	my (%seen, %explicit, %nonExplicit);
+	my (%seen, %explicit, %nonExplicit, %include);
 	my $wantsExplicit = $explicitAlbumHandling->{$self->userId} || 0;
 	my $wantsNonExplicit = !$wantsExplicit || $explicitAlbumHandling->{$self->userId} == 2;
 	my $wantsBoth = $wantsExplicit && $wantsNonExplicit;
@@ -171,15 +171,41 @@ sub _filterAlbums {
 	return [ grep {
 		my $fingerprint = $_->{fingerprint};
 
-		scalar (grep /^LOSSLESS$/, @{$_->{mediaMetadata}->{tags} || []})
+		# LOSSLESS will pick-up HIRES too. Add Atmos albums if enabled
+		scalar (grep /^LOSSLESS$/ || ($prefs->get('enableAtmos') eq '1' ? /^DOLBY_ATMOS$/ : /^$/), @{$_->{mediaMetadata}->{tags} || []})
 			&& $explicitFilter->($_->{explicit}, $fingerprint)
 			&& !$seen{$fingerprint}++
+			&& $include{$fingerprint} eq '1'
 	} map {
 		my $item = $_;
-		my $fingerprint = join(':', $item->{artist}->{id}, $item->{title}, $item->{numberOfTracks}, ($wantsBoth ? $item->{explicit} : undef));
+		my $item_tag = Plugins::TIDAL::API::getMediaInfo($item)->{media_tag};
+		my $fingerprint = join(':', $item->{artist}->{id}, $item->{title}, $item->{numberOfTracks}, $item_tag, ($wantsBoth ? $item->{explicit} : undef));
 
 		$explicit{$fingerprint} ||= $_->{explicit};
 		$nonExplicit{$fingerprint} ||= !$_->{explicit};
+
+		# check item_tag to see if album will be included based on its quality
+		if ( ($prefs->get('enableAtmos') eq '1') && ($item_tag eq '[A]')) {
+			$include{$fingerprint} = '1';
+		}
+		elsif ( ($prefs->get('enableDASH') eq '1') && ($item_tag eq '[M]')) {
+			$include{$fingerprint} = '1';
+		}
+		elsif ( $item_tag eq '[H]') {
+			$include{$fingerprint} = '1';	# include LOSSLESS [High] by default
+		}
+
+		# check if HIRES LOSSLESS just preferred to just LOSSLESS
+		if ($prefs->get('enableDASHPreferHiRes') eq '1') {
+			if ($item_tag eq '[M]') { # remove [H] album if it is already present
+				my $fingerprint_check = $fingerprint =~ s/:\[M\]:/:\[H\]:/r;
+				if ($include{$fingerprint_check} eq '1') { $include{$fingerprint_check} = '0'; }		
+			}
+			elsif ($item_tag eq '[H]') { # do not add [H] if [M] is already present
+				my $fingerprint_check = $fingerprint =~ s/:\[H\]:/:\[M\]:/r;
+				if ($include{$fingerprint_check} eq '1') { $include{$fingerprint} = '0'; }		
+			}
+		}
 
 		$item->{fingerprint} = $fingerprint;
 		$item;

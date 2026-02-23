@@ -320,8 +320,31 @@ my %roleMap = (
 sub _prepareTrack {
 	my ($album, $track) = @_;
 
-	$ct ||= Plugins::TIDAL::API::getFormat();
+	my $trackInfo = Plugins::TIDAL::API::getMediaInfo($track);
+	$ct = $trackInfo->{format};
 	my $url = 'tidal://' . $track->{id} . ".$ct";
+
+	# retrieve mpd dash stream data if enabled
+	if ($prefs->get('enableDASH') eq '1' && $prefs->get('enableDASHStream') eq '1') {
+		sleep(3);	# sleep for 3 seconds to avoid going over limit
+		my $track_stream_data = Plugins::TIDAL::API::Sync->_get(
+			'/tracks/' . $track->{id} . '/playbackinfopostpaywall', 
+			'', {	
+				audioquality => $prefs->get('quality'),
+				playbackmode => 'STREAM',
+				assetpresentation => 'FULL',
+		});
+
+		# insert data			
+		$track->{'albumPeakAmplitude'} = $track_stream_data->{albumPeakAmplitude};
+		$track->{'albumReplayGain'} = $track_stream_data->{albumReplayGain};
+		$track->{'audioMode'} = $track_stream_data->{audioMode};
+		$track->{'audioQuality'} = $track_stream_data->{audioQuality};
+		$track->{'bitDepth'} = $track_stream_data->{bitDepth};
+		$track->{'sampleRate'} = $track_stream_data->{sampleRate};
+		$track->{'trackPeakAmplitude'} = $track_stream_data->{trackPeakAmplitude};
+		$track->{'trackReplayGain'} = $track_stream_data->{trackReplayGain};
+	}
 
 	my $trackData = {
 		url          => $url,
@@ -341,12 +364,18 @@ sub _prepareTrack {
 		EXTID        => $url,
 		TIMESTAMP    => $album->{added},
 		CONTENT_TYPE => $ct,
-		LOSSLESS     => $ct eq 'flc' ? 1 : 0,
+		# flc and mpd (DASH) are lossless
+		LOSSLESS     => $ct eq 'flc' || $ct eq 'mpd' ? 1 : 0,
 		RELEASETYPE  => $album->{type},
 		REPLAYGAIN_ALBUM_GAIN => $track->{albumReplayGain},
 		REPLAYGAIN_ALBUM_PEAK => $track->{albumPeakAmplitude},
 		REPLAYGAIN_TRACK_GAIN => $track->{trackReplayGain} || $track->{replayGain},
 		REPLAYGAIN_TRACK_PEAK => $track->{trackPeakAmplitude} || $track->{peak},
+		# extra data
+		BPM          => $track->{bpm},
+		CHANNELS     => $trackInfo->{channels},
+		SAMPLERATE   => $track->{sampleRate} || $trackInfo->{sample_rate},
+		SAMPLESIZE   => $track->{bitDepth} || $trackInfo->{sample_size},
 	};
 
 	my %contributors;

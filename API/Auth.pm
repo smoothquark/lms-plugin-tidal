@@ -151,6 +151,13 @@ sub _storeTokens {
 sub _call {
 	my ( $class, $url, $cb, $params ) = @_;
 
+	# check if we are using a custom credential
+	if ($prefs->get('enableCustomClientIDSecret') eq '1') {
+		main::DEBUGLOG && $log->is_debug && $log->debug("Using custom credentials: " . $cid . ", " . $sec);
+		$cid = $prefs->get('custom_cid');
+		$sec = $prefs->get('custom_sec');
+	}
+
 	my $bearer = encode_base64(sprintf('%s:%s', $cid, $sec));
 	$bearer =~ s/\s//g;
 
