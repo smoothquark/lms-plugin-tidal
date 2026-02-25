@@ -24,7 +24,7 @@ my (%deviceCodes, $cid, $sec);
 sub init {
 	my $class = shift;
 	
-	# check if we are using cid and sec
+	# check if we are using custom cid and sec
 	if ($prefs->get('enableCustomClientIDSecret') eq '1') {
 		$cid = $prefs->get('custom_cid');
 		$sec = $prefs->get('custom_sec');
