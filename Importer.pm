@@ -327,13 +327,9 @@ sub _prepareTrack {
 	# retrieve mpd dash stream data if enabled
 	if ($prefs->get('enableDASH') eq '1' && $prefs->get('enableDASHStream') eq '1') {
 		sleep(3);	# sleep for 3 seconds to avoid going over limit
-		my $track_stream_data = Plugins::TIDAL::API::Sync->_get(
-			'/tracks/' . $track->{id} . '/playbackinfopostpaywall', 
-			'', {	
-				audioquality => $prefs->get('quality'),
-				playbackmode => 'STREAM',
-				assetpresentation => 'FULL',
-		});
+		
+		require Plugins::TIDAL::API::Sync;
+		my $track_stream_data = Plugins::TIDAL::API::Sync->getTrackData($track->{id}, $prefs->get('quality')) || {};
 
 		# insert data			
 		$track->{'albumPeakAmplitude'} = $track_stream_data->{albumPeakAmplitude};

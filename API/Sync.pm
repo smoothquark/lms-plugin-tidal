@@ -81,6 +81,19 @@ sub getArtist {
 	return $artist;
 }
 
+sub getTrackData {
+	my ($class, $id, $quality) = @_;
+
+	my $track_data = $class->_get(
+			'/tracks/' . $id . '/playbackinfopostpaywall', 
+			'', {	
+				audioquality => $quality,
+				playbackmode => 'STREAM',
+				assetpresentation => 'FULL',
+		});
+	return $track_data;
+}
+
 sub _get {
 	my ( $class, $url, $userId, $params ) = @_;
 
