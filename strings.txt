@@ -4,7 +4,7 @@ PLUGIN_TIDAL_NAME
 PLUGIN_TIDAL_DESC
 	DA	TIDAL plugin for LMS, som ikke kræver MySqueezebox.com.
 	DE	TIDAL Plugin zur Integration mit LMS, ohne Verbindung zu MySqueezebox.com.
-	EN	TIDAL Plugin for LMS, does not depend on MySqueezebox.com.
+	EN	TIDAL Plugin for LMS, does not depend on MySqueezebox.com. Fork by smoothquark to enable HIRES LOSSLESS and DOLBY ATMOS with custom client ID and secret.
 	FR	Plugin TIDAL pour LMS (sans lien avec MySqueezebox.com).
 	HU	A TIDAL beépülő modul az LMS-hez, nem függ a MySqueezebox.com webhelytől.
 	NL	TIDAL Plugin voor LMS
